@@ -10,9 +10,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>org.princast.oma.ans</groupId>
-	<artifactId>ServiceNowSync</artifactId>
+	<artifactId>ExportacionInformesServiceNow</artifactId>
 	<version>1.0.0</version>
-	<name>ServiceNowSync</name>
+	<name>ExportacionInformesServiceNow</name>
 	<description>OMA's Data Importer</description>
 	<properties>
 		<java.version>17</java.version>
@@ -79,14 +79,7 @@
 		  <artifactId>jackson-dataformat-csv</artifactId>
 		  <version>2.17.0</version>
 		</dependency>
-		
-		
-		<dependency>
-		  <groupId>com.fasterxml.jackson.dataformat</groupId>
-		  <artifactId>jackson-dataformat-csv</artifactId>
-		  <version>2.17.0</version>
-		</dependency>
-		
+
 		<dependency>
 		    <groupId>com.ibatis</groupId>
 		    <artifactId>ibatis2-common</artifactId>

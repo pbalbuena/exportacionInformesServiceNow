@@ -1,9 +1,11 @@
 package org.princast.oma.servicenowsync;
 
+import java.io.File;
 import java.io.FileReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.princast.oma.servicenowsync.config.OracleProperties;
 import org.springframework.stereotype.Component;
@@ -22,20 +24,25 @@ public class OracleConnection {
 		this.properties = properties;
 	}
 
-	public void cargarDatos() throws SQLException {
+	public void cargarDatos(List<String> scripts) throws SQLException {
 
 		try (Connection conn = DriverManager.getConnection(
 				properties.getUrl(), properties.getUser(), properties.getPassword())) {
 
 			ScriptRunner runner = new ScriptRunner(conn, false, true);
 
-			runner.runScript(new FileReader("SQL/Cambios2026-6.sql"));
-			runner.runScript(new FileReader("SQL/Factoria2026-6.sql"));
-			runner.runScript(new FileReader("SQL/Incidencias2026-6.sql"));
-			runner.runScript(new FileReader("SQL/IncidenciasTMP2026-6.sql"));
-			runner.runScript(new FileReader("SQL/Relaciones2026-6.sql"));
-			runner.runScript(new FileReader("SQL/Solicitudes2026-6.sql"));
-			runner.runScript(new FileReader("SQL/Tareas2026-6.sql"));
+			for (String script : scripts) {
+
+				File file = new File(script);
+
+				if (!file.exists()) {
+					log.warn("Script SQL no encontrado, se omite: {}", script);
+					continue;
+				}
+
+				log.info("Ejecutando script SQL: {}", script);
+				runner.runScript(new FileReader(file));
+			}
 
 			//conn.commit();
 

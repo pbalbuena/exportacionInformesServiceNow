@@ -22,3 +22,29 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Maven build output
+target/
+
+# Eclipse / m2e
+.classpath
+.factorypath
+.project
+.settings/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Datos generados en tiempo de ejecucion (JSON/CSV/SQL descargados de ServiceNow y logs de la app)
+/JSON/
+/CSV/
+/SQL/
+/logs/
+
+# Configuracion local con credenciales reales (no debe versionarse)
+application-local.properties
+application-*.properties

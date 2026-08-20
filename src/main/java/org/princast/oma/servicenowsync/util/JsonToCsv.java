@@ -2,8 +2,10 @@ package org.princast.oma.servicenowsync.util;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -85,6 +87,10 @@ public class JsonToCsv {
 		    .addColumn("risk")
 		    .build()
 		    .withHeader();
+
+        // Ignora en el CSV cualquier campo del JSON que no este declarado en el
+        // builder de columnas de arriba.
+        descartarColumnasNoDeclaradas(data, schema);
 
         // Escribir CSV
         csvMapper.writer(schema)
@@ -263,6 +269,10 @@ public class JsonToCsv {
 		    .build()
 		    .withHeader();
 
+        // Ignora en el CSV cualquier campo del JSON que no este declarado en el
+        // builder de columnas de arriba.
+        descartarColumnasNoDeclaradas(data, schema);
+
         // Escribir CSV
         csvMapper.writer(schema)
                 .writeValue(new File(salida), data);
@@ -342,6 +352,10 @@ public class JsonToCsv {
 		    .addColumn("variables.18d673ba47eb86907b37945e036d43d2")
 		    .build()
 		    .withHeader();
+
+        // Ignora en el CSV cualquier campo del JSON que no este declarado en el
+        // builder de columnas de arriba.
+        descartarColumnasNoDeclaradas(data, schema);
 
         // Escribir CSV
         csvMapper.writer(schema)
@@ -427,6 +441,10 @@ public class JsonToCsv {
 		    .build()
 		    .withHeader();
 
+        // Ignora en el CSV cualquier campo del JSON que no este declarado en el
+        // builder de columnas de arriba.
+        descartarColumnasNoDeclaradas(data, schema);
+
         // Escribir CSV
         csvMapper.writer(schema)
                 .writeValue(new File(salida), data);
@@ -467,6 +485,10 @@ public class JsonToCsv {
 		    .build()
 		    .withHeader();
 
+        // Ignora en el CSV cualquier campo del JSON que no este declarado en el
+        // builder de columnas de arriba.
+        descartarColumnasNoDeclaradas(data, schema);
+
         // Escribir CSV
         csvMapper.writer(schema)
                 .writeValue(new File(salida), data);
@@ -491,6 +513,10 @@ public class JsonToCsv {
 		    .addColumn("inc_number")
 		    .build()
 		    .withHeader();
+
+        // Ignora en el CSV cualquier campo del JSON que no este declarado en el
+        // builder de columnas de arriba.
+        descartarColumnasNoDeclaradas(data, schema);
 
         // Escribir CSV
         csvMapper.writer(schema)
@@ -533,10 +559,27 @@ public class JsonToCsv {
 		    .build()
 		    .withHeader();
 
+        // Ignora en el CSV cualquier campo del JSON que no este declarado en el
+        // builder de columnas de arriba.
+        descartarColumnasNoDeclaradas(data, schema);
+
         // Escribir CSV
         csvMapper.writer(schema)
                 .writeValue(new File(salida), data);
     }
+
+	private static void descartarColumnasNoDeclaradas(List<Map<String, Object>> data, CsvSchema schema) {
+
+		Set<String> columnas = new HashSet<>();
+
+		for (CsvSchema.Column columna : schema) {
+			columnas.add(columna.getName());
+		}
+
+		for (Map<String, Object> row : data) {
+			row.keySet().retainAll(columnas);
+		}
+	}
 
 	private static Map<String, String> cache = new HashMap<>();
 	

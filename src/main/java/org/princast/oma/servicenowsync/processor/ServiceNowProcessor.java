@@ -3,12 +3,15 @@ package org.princast.oma.servicenowsync.processor;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.princast.oma.servicenowsync.OracleConnection;
 import org.princast.oma.servicenowsync.config.ServiceNowProperties;
 import org.princast.oma.servicenowsync.util.JsonToCsv;
 import org.princast.oma.servicenowsync.util.ServiceNowCSVtoScript;
 import org.princast.oma.servicenowsync.util.ServiceNowClient;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +48,18 @@ public class ServiceNowProcessor {
 		return properties.getRutas().get(tabla).getSql() + fecha + ".sql";
 	}
 	
+	// Se ejecuta el dia 1 de cada mes a las 5:00 (hora del servidor) para
+	// mantener actualizados en base de datos los datos del mes natural anterior.
+	@Scheduled(cron = "0 0 5 1 * *")
+	public void procesarProgramado() {
+		log.info("Iniciando sincronizacion programada mensual con ServiceNow.");
+		try {
+			procesar(null);
+		} catch (Exception e) {
+			log.error("Error en la sincronizacion programada mensual con ServiceNow.", e);
+		}
+	}
+
 	public void procesar(String[] args) throws Exception {
 
 	    String fechaDesde;
@@ -67,6 +82,10 @@ public class ServiceNowProcessor {
 
 	    ServiceNowCSVtoScript insert = new ServiceNowCSVtoScript();
 
+	    // Rutas de los scripts SQL generados en esta ejecucion; son los unicos
+	    // que se ejecutaran contra Oracle a continuacion.
+	    List<String> scriptsGenerados = new ArrayList<>();
+
 	    // Cambios
 	    log.info("Descargando datos de la tabla de cambios.");
 	    serviceNowClient.descargarJSONCambios(
@@ -86,8 +105,9 @@ public class ServiceNowProcessor {
 	            rutaCsv("cambios"),
 	            rutaSql("cambios"),
 	            "MAECAMBIO_SNOW");
+	    scriptsGenerados.add(rutaSql("cambios"));
 
-/*
+
 	    // Incidencias
 	    log.info("Descargando datos de la tabla de incidencias.");
 	    serviceNowClient.descargarJSONIncidencias(
@@ -107,7 +127,8 @@ public class ServiceNowProcessor {
 	            rutaCsv("incidencias"),
 	            rutaSql("incidencias"),
 	            "MAEINCIDENCIA_SNOW");
-*/
+	    scriptsGenerados.add(rutaSql("incidencias"));
+
 
 	    // Solicitudes
 	    log.info("Descargando datos de la tabla de solicitudes.");
@@ -128,6 +149,7 @@ public class ServiceNowProcessor {
 	            rutaCsv("solicitudes"),
 	            rutaSql("solicitudes"),
 	            "MAESOLICITUD_SNOW");
+	    scriptsGenerados.add(rutaSql("solicitudes"));
 
 
 	    // Tareas
@@ -149,6 +171,7 @@ public class ServiceNowProcessor {
 	            rutaCsv("tareas"),
 	            rutaSql("tareas"),
 	            "MAETAREASOLICITUD_SNOW");
+	    scriptsGenerados.add(rutaSql("tareas"));
 
 
 	    // Relaciones
@@ -169,6 +192,7 @@ public class ServiceNowProcessor {
 	            rutaCsv("relaciones"),
 	            rutaSql("relaciones"),
 	            "MAERELACION_SNOW");
+	    scriptsGenerados.add(rutaSql("relaciones"));
 
 
 	    // Incidencias TMP
@@ -190,6 +214,7 @@ public class ServiceNowProcessor {
 	            rutaCsv("incidenciasTmp"),
 	            rutaSql("incidenciasTmp"),
 	            "TMP_INCIDENCIA_SLA");
+	    scriptsGenerados.add(rutaSql("incidenciasTmp"));
 
 
 	    // Horas de factoría
@@ -211,8 +236,9 @@ public class ServiceNowProcessor {
 	            rutaCsv("factoria"),
 	            rutaSql("factoria"),
 	            "TMP_SOLICITUD_SNOW");
+	    scriptsGenerados.add(rutaSql("factoria"));
 
-	    oracleConnection.cargarDatos();
+	    oracleConnection.cargarDatos(scriptsGenerados);
 	}
 
 }

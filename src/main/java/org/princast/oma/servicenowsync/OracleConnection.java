@@ -41,7 +41,10 @@ public class OracleConnection {
 				}
 
 				log.info("Ejecutando script SQL: {}", script);
-				runner.runScript(new FileReader(file));
+
+				try (FileReader reader = new FileReader(file)) {
+					runner.runScript(reader);
+				}
 			}
 
 			//conn.commit();
